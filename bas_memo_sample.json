@@ -1,0 +1,349 @@
+{
+ "documentType": "bas_review_memo",
+ "title": "BAS Review Memo — Quarter ended 30 September 2026 — Example Medical Practice Pty Ltd",
+ "meta": [
+  [
+   "Client",
+   "Example Medical Practice Pty Ltd (ABN 00 000 000 000) – Xero file confirmed"
+  ],
+  [
+   "Period",
+   "Quarter ended 30 September 2026 (GST quarterly, cash basis; PAYGW monthly – W1/W2 = Sep 2026). AS document ID 00000000000, due 25 Nov 2026"
+  ],
+  [
+   "Prepared By",
+   "Claude (AI-assisted)"
+  ],
+  [
+   "Purpose",
+   "BAS Review for Accountant Sign-off"
+  ],
+  [
+   "Sources",
+   "Bundle run example-20260930-01 (rerun; P&L/BS reused from cache). Task files: prior AS Apr–Jun 2026, ICA CSV. Ad-hoc pulls: none."
+  ]
+ ],
+ "legendExtra": "Account-level findings with no single Xero record are shown as plain text.",
+ "executiveSummary": {
+  "bullets": [
+   "The BAS cannot be lodged as it stands: MasterCard statement lines stop at 3 Aug 2026 and the Savings 1234 account has an unreconciled $800 transfer (Section {{sec:1}}).",
+   "Merchant fees coded GST-free in all three months: $51.68 of credits missed. Recode to 407 Merchant Fees, e.g. {{xero:https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=EXAMPLE&accountID=EXAMPLE|1 Jul $195.62}} (Section {{sec:9}}).",
+   "Please be advised that there's an increase in the BAS payable this quarter, mainly because of a higher PAYG income tax instalment (ATO rate 11.70% replaces the varied 8.75%); expected payable ≈ $45,513 against $34,968 (+30.2%) (Section {{sec:7}})."
+  ],
+  "bankRecCompleted": "No",
+  "lodgementReady": "No",
+  "materialVariances": "Yes",
+  "keyRiskDrivers": [
+   "High – Credit card 5678: no statement lines after 3 Aug 2026 (account-level, no single Xero record) (Section {{sec:1}}).",
+   "Medium – Airline fare $2,767.48 claimed without a tax invoice: {{xero:https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=EXAMPLE2&accountID=EXAMPLE|19 Jul txn}} (Section {{sec:9}})."
+  ],
+  "gstRiskLevel": "Medium",
+  "gstVariance": "$0.08 (control account vs computed 1A − 1B; rounding) (Section {{sec:4}})",
+  "overallRiskLevel": "High",
+  "lockPeriods": "Xero's Period Lock Date is 30 June 2026, preceding the BAS period end – periods are not yet locked through the BAS period end, confirm before lodgement.",
+  "recommendedAction": "Do not lodge yet. Import the MasterCard (from 4 Aug) and Savings 1234 statements, reconcile, recode merchant fees, then re-run.",
+  "time": "0:05:12",
+  "usage": "Bundle run example-20260930-01: 31 Xero calls, 212 Make operations; agent tool calls 3; render 4 s."
+ },
+ "sections": [
+  {
+   "number": 1,
+   "title": "Bank Reconciliation Review",
+   "tables": [
+    {
+     "columns": [
+      "Account",
+      "Balance in Xero",
+      "Outst. payments",
+      "Outst. receipts",
+      "Unrec. stmt lines",
+      "Calc. stmt balance",
+      "Last stmt line",
+      "Duplicates",
+      "Manual lines",
+      "Tie-out",
+      "Result"
+     ],
+     "colWidths": [
+      2.2,
+      1.3,
+      1.1,
+      1.1,
+      1.1,
+      1.3,
+      1.2,
+      1.6,
+      1.1,
+      1,
+      1.6
+     ],
+     "rows": [
+      [
+       "Operating account",
+       "5,336.84",
+       "0.00",
+       "0.00",
+       "0",
+       "5,336.84",
+       "30 Sep",
+       "4 feed groups – Low",
+       "None",
+       "0.00",
+       "Pass"
+      ],
+      [
+       "Savings 1234",
+       "(780.89)",
+       "800.00",
+       "0.00",
+       "0",
+       "19.11",
+       "29 Jun",
+       "None",
+       "None",
+       "0.00",
+       "High – incomplete"
+      ],
+      [
+       "Credit card 5678",
+       "(16,351.40)",
+       "0.00",
+       "0.00",
+       "0",
+       "(16,351.40)",
+       "3 Aug",
+       "3 × $299.98 imported, GST – High",
+       "All imported",
+       "0.00",
+       "High – statements missing"
+      ]
+     ],
+     "redRows": [
+      1,
+      2
+     ]
+    }
+   ],
+   "observations": [
+    "Conclusion: not complete. Statements requested from the client on 27 Oct are not yet on the Task.",
+    "Calculated balance out by: not available via the Xero API — deleted statement lines and a bank-reported balance that differs from Xero's cannot be detected this way."
+   ]
+  },
+  {
+   "number": 2,
+   "title": "Fixed Asset & Depreciation Review",
+   "tables": [
+    {
+     "columns": [
+      "Check",
+      "Result",
+      "Flag"
+     ],
+     "colWidths": [
+      2,
+      3,
+      1
+     ],
+     "rows": [
+      [
+       "Draft assets in register",
+       "None ({{xero:https://fixedassets.xero.com/?CID=EXAMPLE&fromNav=true#assets/draft|register}})",
+       "OK"
+      ],
+      [
+       "Depreciation run Jul / Aug / Sep",
+       "Posted / Posted / Posted",
+       "OK"
+      ],
+      [
+       "Register vs ledger",
+       "No differences",
+       "OK"
+      ],
+      [
+       "Asset candidates ≥ $1,000",
+       "None",
+       "OK"
+      ]
+     ]
+    }
+   ],
+   "observations": [
+    "No additions or disposals in the quarter."
+   ]
+  },
+  {
+   "number": 4,
+   "title": "GST Reconciliation Review",
+   "tables": [
+    {
+     "columns": [
+      "Item",
+      "Amount ($)",
+      "Source"
+     ],
+     "colWidths": [
+      2.5,
+      1,
+      3
+     ],
+     "rows": [
+      [
+       "GST control at 30 Sep 2026",
+       "(3,689.43)",
+       "Balance Sheet"
+      ],
+      [
+       "Add GST on aged payables",
+       "0.00",
+       "Subledger = control"
+      ],
+      [
+       "Less GST on aged receivables",
+       "0.00",
+       "INV-0001 GST-free"
+      ],
+      [
+       "Computed 1A − 1B",
+       "(3,689.35)",
+       "Bundle transaction build"
+      ],
+      [
+       "Variance",
+       "0.08",
+       "Rounding – no action"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 7,
+   "title": "Activity Statement Comparison",
+   "tables": [
+    {
+     "columns": [
+      "Label",
+      "Current ($)",
+      "Previous ($)",
+      "Variance ($)",
+      "Variance (%)",
+      "Commentary"
+     ],
+     "colWidths": [
+      1.6,
+      1,
+      1,
+      1,
+      1,
+      3
+     ],
+     "rows": [
+      [
+       "G1",
+       "351,514",
+       "357,986",
+       "(6,472)",
+       "−1.8%",
+       "Bundle computed, cash basis"
+      ],
+      [
+       "T11",
+       "40,979",
+       "31,194",
+       "9,785",
+       "+31.4%",
+       "350,249 × 11.70%"
+      ],
+      [
+       "Net payable (9)",
+       "45,513",
+       "34,968",
+       "10,545",
+       "+30.2%",
+       "Material"
+      ]
+     ]
+    }
+   ],
+   "observations": [
+    "Movements are logical; the increase is the instalment rate."
+   ]
+  },
+  {
+   "number": 9,
+   "title": "GST Integrity & Coding Review",
+   "tables": [
+    {
+     "columns": [
+      "Issue",
+      "Evidence",
+      "Systemic / isolated",
+      "Est. impact",
+      "Risk"
+     ],
+     "colWidths": [
+      1.5,
+      3,
+      1,
+      1,
+      0.8
+     ],
+     "rows": [
+      [
+       "Merchant fees GST-free",
+       "{{xero:https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=EXAMPLE&accountID=EXAMPLE|1 Jul $195.62}}, 3 Aug, 1 Sep",
+       "Systemic",
+       "1B −$51.68 (client's favour)",
+       "Medium"
+      ],
+      [
+       "Airline fare no tax invoice",
+       "{{xero:https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=EXAMPLE2&accountID=EXAMPLE|19 Jul $2,767.48}}",
+       "Isolated",
+       "$251.59 at risk",
+       "Medium"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 10,
+   "title": "High Risks Table",
+   "tables": [
+    {
+     "columns": [
+      "Risk Area",
+      "Issue",
+      "Evidence",
+      "Likely Impact",
+      "Required Action",
+      "Severity"
+     ],
+     "rows": [
+      [
+       "Bank rec",
+       "MasterCard statements missing 4 Aug–30 Sep",
+       "Section {{sec:1}}",
+       "1B understated",
+       "Import and reconcile",
+       "High"
+      ],
+      [
+       "Substantiation",
+       "Airline fare no tax invoice",
+       "Section {{sec:9}}",
+       "$251.59",
+       "Obtain invoice",
+       "Medium"
+      ]
+     ],
+     "redRows": [
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}
