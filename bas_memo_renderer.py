@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Judge Accountants — BAS Review Memo / Prefilled BAS renderer.
+Judge Accountants — BAS Review Memo / Prefilled BAS renderer.  v1.1 (2 Nov 2026)
+v1.1: prefilled_bas renders (legend section jump only when Section 4 exists; no text-field
+requirement for prefilled_bas); review memo now requires both fillable text fields.
 
 Usage:  python3 bas_memo_renderer.py memo.json out.pdf [--logo logo.png] [--font-dir DIR]
 
@@ -64,6 +66,11 @@ def mk(text):
     s = TOKEN_SEC.sub(lambda m: f'<a href="#sec{m.group(1)}" color="#1155CC"><u>{m.group(1)}</u></a>', s)
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
     return s.replace("\n", "<br/>")
+
+def legend_has_jump(d):
+    """v1.1: the legend's Section 4 example is only drawn when a numbered Section 4 exists
+    (a prefilled_bas has unnumbered sections, so V1.0 failed with 'undefined destination sec4')."""
+    return any(str(x.get("number")) == "4" for x in d.get("sections", []) if x.get("number") is not None)
 
 # ---------- fillable flowables ----------
 class CheckLine(Flowable):
@@ -179,9 +186,11 @@ class Renderer:
             else "BAS Review Working Paper — For Accountant Review Only — Not for Client Distribution")), self.st["sub"]))
         s.append(self.table(["Working Paper", ""], [[k, v] for k, v in d.get("meta", [])], col_widths=[1, 4]))
         s.append(Spacer(1, 6))
-        s.append(self.P("Underlined green text is a hyperlink to the corresponding record in Xero. Underlined blue "
-                        "section numbers (e.g. Section {{sec:4}}) jump to that section within this document. "
-                        + (d.get("legendExtra") or ""), "small"))
+        legend = "Underlined green text is a hyperlink to the corresponding record in Xero. "
+        if legend_has_jump(d):
+            legend += ("Underlined blue section numbers (e.g. Section {{sec:4}}) jump to that section within "
+                       "this document. ")
+        s.append(self.P(legend + (d.get("legendExtra") or ""), "small"))
         s.append(Spacer(1, 8))
 
         if not prefilled:
@@ -233,7 +242,7 @@ class Renderer:
         doc.build(s)
 
 # ---------- verification ----------
-def verify(pdf_path, expect_sections, expected_goto):
+def verify(pdf_path, expect_sections, expected_goto, min_text_fields=1):
     """reportlab resolves <a href="#secN"> into direct /Dest arrays [page /XYZ x y z] (genuine GoTo
     destinations, not named dests). Check every link is either a URI or a page-bound GoTo, that the
     number of GoTo links equals the number of {{sec:N}} tokens, and that fields exist."""
@@ -259,7 +268,8 @@ def verify(pdf_path, expect_sections, expected_goto):
           f"checkboxes: {len(cbs)}; text fields: {len(txs)}; sections: {expect_sections}")
     if bad: print("BAD links:", bad)
     if goto != expected_goto: print("GoTo count mismatch")
-    return not bad and goto == expected_goto and len(txs) >= 1
+    if len(txs) < min_text_fields: print(f"text fields: {len(txs)} of {min_text_fields} expected")
+    return not bad and goto == expected_goto and len(txs) >= min_text_fields
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("json"); ap.add_argument("out")
@@ -267,7 +277,8 @@ def main():
     data = json.load(open(a.json, encoding="utf-8"))
     Renderer(data, a.logo, a.font_dir).build(a.out)
     expect = [s["number"] for s in data.get("sections", []) if s.get("number") is not None]
-    expected_goto = len(TOKEN_SEC.findall(json.dumps(data, ensure_ascii=False))) + 1  # +1 for the legend example
-    ok = verify(a.out, expect, expected_goto); print("PDF:", a.out, "OK" if ok else "FAILED"); sys.exit(0 if ok else 1)
+    expected_goto = len(TOKEN_SEC.findall(json.dumps(data, ensure_ascii=False))) + (1 if legend_has_jump(data) else 0)
+    min_tx = 0 if data.get("documentType") == "prefilled_bas" else 2  # memo: GST Variance Explanation + Notes to Reviewer
+    ok = verify(a.out, expect, expected_goto, min_tx); print("PDF:", a.out, "OK" if ok else "FAILED"); sys.exit(0 if ok else 1)
 
 if __name__ == "__main__": main()
